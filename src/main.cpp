@@ -9,9 +9,10 @@ using namespace cv;
 
 void bilinear(Mat img, Mat dst) {
 
-    for (int j = 0; j < img.rows; j++) {
-        for (int c = 0; c < img.cols; c++) {
-            if (j + 1 < img.rows && c + 1 < img.cols) {
+    for (int j = 0; j <= img.rows; j++) {
+        for (int c = 0; c <= img.cols; c++) {
+            if (j < img.rows && c < img.cols) {
+
                 int r = 0;
                 int b = 0;
                 int g = 0;
@@ -35,105 +36,243 @@ void bilinear(Mat img, Mat dst) {
                 if (c % 2 != 0 && j % 2 != 0) {
                     r = (int)img.at<Vec3b>(j, c)[1];
 
-                    if (j != 0) {
-                        if (c != 0) {
-                            b1 = (int)img.at<Vec3b>(j - 1, c - 1)[0];
-                        }
-                        if (c + 1 < img.cols) {
-                            b2 = (int)img.at<Vec3b>(j - 1, c + 1)[0];
-                        }
-
-                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
-                    }
-                    if (j + 1 < img.rows) {
+                    if (j == 0) {      
+                        g4 = (int)img.at<Vec3b>(j + 1, c)[2];
                         if (c != 0) {
                             b3 = (int)img.at<Vec3b>(j + 1, c - 1)[0];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            b3 = (int)img.at<Vec3b>(j + 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            g = (g3 + g4) / 2;
                         }
                         if (c + 1 < img.cols) {
                             b4 = (int)img.at<Vec3b>(j + 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            b4 = b3;
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            g = (g2 + g4) / 2;
                         }
 
-                        g4 = (int)img.at<Vec3b>(j + 1, c)[2];
-                    }
+                        b = (b3 + b4) / 2;
 
-                    if (c != 0) {
-                        g2 = (int)img.at<Vec3b>(j, c - 1)[2];
-                    }
-                    if (c + 1 < img.cols) {
-                        g3 = (int)img.at<Vec3b>(j, c + 1)[2];
-                    }
-
-                    b = 0.25 * (b1 + b2 + b3 + b4);
-                    g = 0.25 * (g1 + g2 + g3 + g4);
-                }
-                // Current Pixel is Blue, Green and Red are Unknown
-                else if (c % 2 == 0 && j % 2 == 0) { 
-                    b = (int)img.at<Vec3b>(j, c)[0];
-
-                    if (j != 0) {
+                        if (g == 0) {
+                            g = (g2 + g3 + g4) / 3;
+                        }
+                    } else if (j + 1 >= img.rows) {
+                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
                         if (c != 0) {
-                            r1 = (int)img.at<Vec3b>(j - 1, c - 1)[1];
+                            b1 = (int)img.at<Vec3b>(j - 1, c - 1)[0];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            b1 = (int)img.at<Vec3b>(j - 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            g = (g1 + g3) / 2;
                         }
                         if (c + 1 < img.cols) {
-                            r2 = (int)img.at<Vec3b>(j - 1, c + 1)[1];
+                            b2 = (int)img.at<Vec3b>(j - 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            b2 = b1;
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            g = (g1 + g2) / 2;
                         }
 
-                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
+                        b = (b1 + b2) / 2;
+                        if (g == 0) {
+                            g = (g1 + g2 + g3) / 3;
+                        }
                     }
-                    if (j + 1 < img.rows) {
+                    else {
+                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
+                        g4 = (int)img.at<Vec3b>(j + 1, c)[2];
+                        if (c != 0) {
+                            b1 = (int)img.at<Vec3b>(j - 1, c - 1)[0];
+                            b3 = (int)img.at<Vec3b>(j + 1, c - 1)[0];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            b2 = (int)img.at<Vec3b>(j - 1, c + 1)[0];
+                            b4 = (int)img.at<Vec3b>(j + 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            b = (b2 + b4) / 2;
+                            g = (g1 + g3 + g4) / 3;
+                        }
+                        if (c + 1 < img.cols) {
+                            b2 = (int)img.at<Vec3b>(j - 1, c + 1)[0];
+                            b4 = (int)img.at<Vec3b>(j + 1, c + 1)[0];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            b1 = (int)img.at<Vec3b>(j - 1, c - 1)[0];
+                            b3 = (int)img.at<Vec3b>(j + 1, c - 1)[0];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            b = (b1 + b3) / 2;
+                            g = (g1 + g2 + g4) / 3;
+                        }
+
+                        if (b == 0) {
+                            b = 0.25 * (b1 + b2 + b3 + b4);
+                        }
+                        if (g == 0) {
+                            g = 0.25 * (g1 + g2 + g3 + g4);
+                        }
+                    }
+                }
+                // Current Pixel is Blue, Green and Red are Unknown
+                else if (c % 2 == 0 && j % 2 == 0) {
+                    b = (int)img.at<Vec3b>(j, c)[0];
+
+                    if (j == 0) {
+                        g4 = (int)img.at<Vec3b>(j + 1, c)[2];
                         if (c != 0) {
                             r3 = (int)img.at<Vec3b>(j + 1, c - 1)[1];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            r3 = (int)img.at<Vec3b>(j + 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            g = (g3 + g4) / 2;
                         }
                         if (c + 1 < img.cols) {
                             r4 = (int)img.at<Vec3b>(j + 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            r4 = r3;
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            g = (g2 + g4) / 2;
                         }
 
+                        r = (r3 + r4) / 2;
+                        if (g == 0) {
+                            g = (g2 + g3 + g4) / 3;
+                        }
+                    }
+                    else if (j + 1 >= img.rows) {
+                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
+                        if (c != 0) {
+                            r1 = (int)img.at<Vec3b>(j - 1, c - 1)[1];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            r1 = (int)img.at<Vec3b>(j - 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            g = (g3 + g4) / 2;
+                        }
+                        if (c + 1 < img.cols) {
+                            r2 = (int)img.at<Vec3b>(j - 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            r2 = r1;
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            g = (g2 + g4) / 2;
+                        }
+
+                        r = (r1 + r2) / 2;
+
+                        if (g == 0) {
+                            g = (g2 + g3 + g4) / 3;
+                        }
+                    }
+                    else {
+                        g1 = (int)img.at<Vec3b>(j - 1, c)[2];
                         g4 = (int)img.at<Vec3b>(j + 1, c)[2];
-                    }
+                        if (c != 0) {
+                            r1 = (int)img.at<Vec3b>(j - 1, c - 1)[1];
+                            r3 = (int)img.at<Vec3b>(j + 1, c - 1)[1];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        }
+                        else {
+                            r2 = (int)img.at<Vec3b>(j - 1, c + 1)[1];
+                            r4 = (int)img.at<Vec3b>(j + 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                            r = (r2 + r4) / 2;
+                            g = (g1 + g3 + g4) / 3;
+                        }
+                        if (c + 1 < img.cols) {
+                            r2 = (int)img.at<Vec3b>(j - 1, c + 1)[1];
+                            r4 = (int)img.at<Vec3b>(j + 1, c + 1)[1];
+                            g3 = (int)img.at<Vec3b>(j, c + 1)[2];
+                        }
+                        else {
+                            r1 = (int)img.at<Vec3b>(j - 1, c - 1)[1];
+                            r3 = (int)img.at<Vec3b>(j + 1, c - 1)[1];
+                            g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                            r = (r1 + r3) / 2;
+                            g = (g1 + g2 + g4) / 3;
+                        }
 
-                    if (c != 0) {
-                        g2 = (int)img.at<Vec3b>(j, c - 1)[2];
+                        if (r == 0) {
+                            r = 0.25 * (r1 + r2 + r3 + r4);
+                        }
+                        if (g == 0) {
+                            g = 0.25 * (g1 + g2 + g3 + g4);
+                        }
                     }
-
-                    if (c + 1 < img.cols) {
-                        g3 = (int)img.at<Vec3b>(j, c + 1)[2];
-                    }
-
-                    r = 0.25 * (r1 + r2 + r3 + r4);
-                    g = 0.25 * (g1 + g2 + g3 + g4);
                 }
                 // Current Pixel is Green, Blue and Red is unknown
-                else {       
+                else {
                     g = (int)img.at<Vec3b>(j, c)[2];
 
                     if (j % 2 != 0) {
                         if (c != 0) {
                             r1 = (int)img.at<Vec3b>(j, c - 1)[1];
                         }
+                        else {
+                            r1 = (int)img.at<Vec3b>(j, c + 1)[1];
+                        }
                         if (c + 1 < img.cols) {
                             r2 = (int)img.at<Vec3b>(j, c + 1)[1];
+                        }
+                        else {
+                            r2 = r1;
                         }
 
                         if (j != 0) {
                             b1 = (int)img.at<Vec3b>(j - 1, c)[0];
                         }
+                        else {
+                            b1 = (int)img.at<Vec3b>(j + 1, c)[0];
+                        }
                         if (j + 1 < img.rows) {
                             b2 = (int)img.at<Vec3b>(j + 1, c)[0];
+                        }
+                        else {
+                            b2 = b1;
                         }
                     }
                     else {
                         if (j != 0) {
                             r1 = (int)img.at<Vec3b>(j - 1, c)[1];
                         }
+                        else {
+                            r1 = (int)img.at<Vec3b>(j + 1, c)[1];
+                        }
                         if (j + 1 < img.rows) {
-                            r2 = (int)img.at<Vec3b>(j + 1, c + 2)[1];
+                            r2 = (int)img.at<Vec3b>(j + 1, c)[1];
+                        }
+                        else {
+                            r2 = r1;
                         }
 
                         if (c != 0) {
                             b1 = (int)img.at<Vec3b>(j, c - 1)[0];
                         }
+                        else {
+                            b1  = (int)img.at<Vec3b>(j, c + 1)[0];
+                        }
                         if (c + 1 < img.cols) {
                             b2 = (int)img.at<Vec3b>(j, c + 1)[0];
+                        }
+                        else {
+                            b2 = b1;
                         }
                     }
 
@@ -145,7 +284,6 @@ void bilinear(Mat img, Mat dst) {
 
                 dst.at<Vec3b>(j, c) = p;
             }
-        
         }
     }
 
@@ -183,9 +321,9 @@ int getValue(Mat img, int row, int col, int color) {
 void bicubic(Mat img, Mat dst) {
     double y = 0.2;
 
-    for (int j = 0; j < img.rows; j++) {
-        for (int c = 0; c < img.cols; c++) {
-            if (j + 1 < img.rows && c + 1 < img.cols) {
+    for (int j = 0; j <= img.rows; j++) {
+        for (int c = 0; c <= img.cols; c++) {
+            if (j < img.rows && c < img.cols) {
 
                 int r = 0;
                 int b = 0;
@@ -325,52 +463,41 @@ void bicubic(Mat img, Mat dst) {
 
 int main(int ac, char** av)
 {
-    /*
+    
     std::cout << "Image Path: " << std::endl;
-    std::string imgPath;
+    std::string imgPath; // = av[1];
     std::getline(std::cin, imgPath);
 
-    std::cout << "Safe Path: " << std::endl;
-    std::string safePath;
-    std::getline(std::cin, safePath);*/
+    std::cout << "Image Name: " << std::endl;
+    std::string imgName; // = av[2];
+    std::getline(std::cin, imgName);
 
-    std::string  imgPath = samples::findFile("C:/Users/merle/Pictures/Demosaicing/MSR-Demosaicing/Dataset_LINEAR_without_noise/bayer_panasonic/input/49.png");
-    //std::string img_path = samples::findFile("C:/Users/merle/Pictures/Demosaicing/c.TIF");
-
-    //Mat img = imread(imgPath, IMREAD_GRAYSCALE);
-    Mat img = imread(imgPath, IMREAD_COLOR);
-
+    std::string i = imgPath + "/" + imgName;
+    Mat img = imread(i, IMREAD_COLOR);
 
     if (img.empty())
     {
-        std::cout << "Could not read the image: " << imgPath << std::endl;
+        std::cout << "Could not read the image: " << i << std::endl;
         return 1;
     }
 
     int width = img.cols;
     int height = img.rows;
 
-    Mat3b dst;
+    Mat3b bil;
     Mat3b bic;
 
-    dst = Mat::zeros(height, width, CV_8UC1);
+    bil = Mat::zeros(height, width, CV_8UC1);
     bic = Mat::zeros(height, width, CV_8UC1);
 
-    bilinear(img, dst);
+    bilinear(img, bil);
     bicubic(img, bic);
 
-    cv::imshow("Old Image", img);
-    cv::imshow("New Image", dst);
-    cv::imshow("Bicubic Image", bic);
-    int k = waitKey(0); // Wait for a keystroke in the window
-    if (k == 's')
-    {
-        std::string path = "C:/Users/merle/Pictures/Demosaicing/Test/49_bil_new.png";
-        imwrite(path, dst);
+    std::string safe_Bil = imgPath + "/" + "bil_" + imgName;
+    imwrite(safe_Bil, bil);
 
-        std::string safePath = "C:/Users/merle/Pictures/Demosaicing/Test/49_bic_new.png";
-        imwrite(safePath, bic);
-    }
+    std::string safe_Bic = imgPath + "/" + "bic_" + imgName;
+    imwrite(safe_Bic, bic);
 
     return 0;
 }
